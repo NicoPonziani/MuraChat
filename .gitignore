@@ -1,0 +1,72 @@
+# ===== DOCS =====
+.instructions
+docs/
+
+# ===== BUILD OUTPUT =====
+target/
+*.jar
+*.war
+*.ear
+*.class
+
+# ===== MAVEN =====
+.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+
+# ===== IDE — IntelliJ IDEA =====
+.idea/
+*.iws
+*.iml
+*.ipr
+out/
+.idea_modules/
+
+# ===== IDE — Eclipse =====
+.classpath
+.project
+.settings/
+.factorypath
+bin/
+
+# ===== IDE — VS Code =====
+.vscode/
+*.code-workspace
+
+# ===== SPRING BOOT =====
+# Generated configuration metadata (ricostruibile con mvn compile)
+**/META-INF/spring-configuration-metadata.json
+**/META-INF/additional-spring-configuration-metadata.json
+
+# ===== OS =====
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ===== LOGS =====
+*.log
+logs/
+spring.log
+
+# ===== ENV / SECRETS =====
+.env
+.env.*
+application-local.yml
+application-local.properties
+**/src/main/resources/application-secret*.yml
+**/src/main/resources/application-secret*.properties
+
+# ===== TESTCONTAINERS =====
+.testcontainers.properties
+
+# ===== DOCKER =====
+docker-compose.override.yml
+
+# ===== CHECKSTYLE / PMD / SPOTBUGS (report generati) =====
+checkstyle-result.xml
+pmd.xml
+spotbugsXml.xml
+
+# ===== JACOCO (report coverage) =====
+jacoco.exec
+
