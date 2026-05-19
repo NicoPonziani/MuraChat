@@ -9,9 +9,6 @@ jobs:
     name: Deploy snapshot to GitHub Packages
     runs-on: ubuntu-latest
 
-    # Only run when the version is a SNAPSHOT — avoids accidental release deploys.
-    if: contains(github.event.head_commit.message, '[deploy]') || endsWith(github.ref, '/main')
-
     permissions:
       contents: read
       packages: write
@@ -31,15 +28,19 @@ jobs:
           server-password: GITHUB_TOKEN
 
       - name: Check version is a SNAPSHOT
+        id: version-check
         run: |
           VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
           echo "Project version: $VERSION"
-          if [[ "$VERSION" != *"-SNAPSHOT" ]]; then
+          if [[ "$VERSION" == *"-SNAPSHOT" ]]; then
+            echo "is_snapshot=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "is_snapshot=false" >> "$GITHUB_OUTPUT"
             echo "Not a SNAPSHOT version — skipping deployment."
-            exit 0
           fi
 
       - name: Build and deploy
+        if: steps.version-check.outputs.is_snapshot == 'true'
         run: mvn --batch-mode clean deploy -DskipTests
         env:
           GITHUB_ACTOR: ${{ github.actor }}
