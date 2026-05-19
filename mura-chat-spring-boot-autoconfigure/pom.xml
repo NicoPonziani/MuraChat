@@ -32,6 +32,30 @@
             <artifactId>spring-boot-autoconfigure</artifactId>
         </dependency>
 
+        <!--
+            Dipendenze dichiarate esplicitamente anche se disponibili transitivamente da
+            spring-boot-autoconfigure. Una libreria non deve fare affidamento su dipendenze
+            transitive implicite: se le usa direttamente nel codice, va dichiararle.
+        -->
+
+        <!-- @AutoConfiguration, @Bean, ApplicationContext — usati direttamente nel codice -->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context</artifactId>
+        </dependency>
+
+        <!-- SLF4J — Logger/LoggerFactory usati direttamente in MuraChatAutoConfiguration -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+        </dependency>
+
+        <!-- @Valid, @Validated — usate direttamente in ChatbotProperties -->
+        <dependency>
+            <groupId>jakarta.validation</groupId>
+            <artifactId>jakarta.validation-api</artifactId>
+        </dependency>
+
         <!-- Annotation Processor — genera metadata JSON per IDE autocomplete delle properties -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
