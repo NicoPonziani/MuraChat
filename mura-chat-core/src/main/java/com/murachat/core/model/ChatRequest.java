@@ -2,6 +2,7 @@ package com.murachat.core.model;
 
 import jakarta.validation.constraints.NotBlank;
 import java.util.Map;
+import java.util.UUID;
 
 /**
  * Immutable request model for a single chatbot interaction.
@@ -23,7 +24,7 @@ public record ChatRequest(
 
     /** Stateless request — no memory, no extra context. */
     public static ChatRequest of(String message) {
-        return new ChatRequest(message, null, null);
+        return new ChatRequest(message, UUID.randomUUID().toString(), null);
     }
 
     /** Multi-turn request — memory identified by conversationId, no extra context. */
