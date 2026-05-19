@@ -87,14 +87,6 @@ All beans are `@ConditionalOnMissingBean` — override any component by register
 
 ---
 
-## Architecture Decision Records
-
-- [ADR-001: HTTP exposure delegated to consuming app](docs/adr/ADR-001-http-exposure.md)
-- [ADR-002: Three-module structure with pure Java core](docs/adr/ADR-002-three-module-structure.md)
-- [ADR-003: ResponseStatus enum instead of exceptions](docs/adr/ADR-003-response-status-enum.md)
-
----
-
 ## Project Status
 
 | Sprint | Focus | Status |

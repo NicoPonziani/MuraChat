@@ -8,21 +8,29 @@ import static org.assertj.core.api.Assertions.assertThat;
 class ChatRequestTest {
 
     @Test
-    void ofMessage_createsStatelessRequest() {
+    void ofMessage_autoGeneratesConversationId() {
         var request = ChatRequest.of("Hello");
 
         assertThat(request.message()).isEqualTo("Hello");
-        assertThat(request.conversationId()).isNull();
-        assertThat(request.context()).isNull();
-        assertThat(request.hasConversation()).isFalse();
+        // conversationId is always guaranteed — auto-generated via UUID if not provided
+        assertThat(request.conversationId()).isNotBlank();
+        // context defaults to Map.of(), never null
+        assertThat(request.context()).isEmpty();
         assertThat(request.hasContext()).isFalse();
     }
 
     @Test
-    void ofMessageAndConversationId_createsMultiTurnRequest() {
+    void ofMessage_eachCallGeneratesDistinctConversationId() {
+        var r1 = ChatRequest.of("Hello");
+        var r2 = ChatRequest.of("Hello");
+
+        assertThat(r1.conversationId()).isNotEqualTo(r2.conversationId());
+    }
+
+    @Test
+    void ofMessageAndConversationId_preservesProvidedId() {
         var request = ChatRequest.of("Hello", "conv-123");
 
-        assertThat(request.hasConversation()).isTrue();
         assertThat(request.conversationId()).isEqualTo("conv-123");
     }
 
@@ -36,9 +44,11 @@ class ChatRequestTest {
     }
 
     @Test
-    void blankConversationId_treatedAsNoConversation() {
-        var request = ChatRequest.of("Hello", "   ");
+    void nullContext_normalisedToEmptyMap() {
+        // compact constructor normalises null context → Map.of()
+        var request = new ChatRequest("Hello", "conv-789", null);
 
-        assertThat(request.hasConversation()).isFalse();
+        assertThat(request.context()).isEmpty();
+        assertThat(request.hasContext()).isFalse();
     }
 }

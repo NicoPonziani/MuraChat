@@ -3,7 +3,6 @@ package com.murachat.autoconfigure;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.boot.context.properties.NestedConfigurationProperty;
 import org.springframework.validation.annotation.Validated;
 
 import java.util.ArrayList;
@@ -54,15 +53,19 @@ public record ChatbotProperties (
     // -------------------------------------------------------------------------
 
     /**
-     * Properties for the underlying LLM. Defaults to OpenAI's gpt-4o model. The API key must be provided via environment variable or external config for security.
-     * @param provider LLM provider name. Supported values: openai, azure, anthropic. Default: openai.
-     * @param model LLM model name. Default: gpt-4o for OpenAI, or equivalent for other providers.
-     * @param apiKey API key for authenticating with the LLM provider. No default value for security reasons — must be set via environment variable or external config.
+     * Properties for the underlying LLM. Defaults to OpenAI's gpt-4o model.
+     * The API key is intentionally not validated here — Spring AI validates it
+     * lazily when the actual {@code ChatClient} is constructed (Sprint 2).
+     * This allows tests and Ollama-based setups to run without an API key.
+     *
+     * @param provider LLM provider name. Supported values: openai, ollama. Default: openai.
+     * @param model    LLM model name. Default: gpt-4o for OpenAI.
+     * @param apiKey   API key for the LLM provider. Optional here — required by Spring AI at runtime.
      */
     public record LlmProperties(
         String provider,
         String model,
-        @NotBlank String apiKey
+        String apiKey
     ) {
         public LlmProperties{
             if(provider == null || provider.isBlank()) provider = "openai";
