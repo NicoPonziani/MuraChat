@@ -70,3 +70,5 @@ spotbugsXml.xml
 # ===== JACOCO (report coverage) =====
 jacoco.exec
 
+# ===== LEARNING NOTES =====
+.learn

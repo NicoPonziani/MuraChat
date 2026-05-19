@@ -88,6 +88,17 @@
         </dependencies>
     </dependencyManagement>
 
+     <distributionManagement>
+        <snapshotRepository>
+            <id>github</id>
+            <url>https://maven.pkg.github.com/NicoPonziani/MuraChat</url>
+        </snapshotRepository>
+        <repository>
+            <id>github</id>
+            <url>https://maven.pkg.github.com/NicoPonziani/MuraChat</url>
+        </repository>
+    </distributionManagement>
+
     <build>
         <pluginManagement>
             <plugins>
