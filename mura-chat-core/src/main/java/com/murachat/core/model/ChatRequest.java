@@ -24,12 +24,12 @@ public record ChatRequest(
 
     /** Stateless request — no memory, no extra context. */
     public static ChatRequest of(String message) {
-        return new ChatRequest(message, UUID.randomUUID().toString(), null);
+        return new ChatRequest(message, UUID.randomUUID().toString(), Map.of());
     }
 
     /** Multi-turn request — memory identified by conversationId, no extra context. */
     public static ChatRequest of(String message, String conversationId) {
-        return new ChatRequest(message, conversationId, null);
+        return new ChatRequest(message, conversationId, Map.of());
     }
 
     /** Full request with conversation memory and application context. */
