@@ -8,6 +8,7 @@
         <groupId>com.murachat</groupId>
         <artifactId>mura-chat-parent</artifactId>
         <version>1.0.0-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
     </parent>
 
     <artifactId>mura-chat-spring-boot-autoconfigure</artifactId>
@@ -33,35 +34,31 @@
         </dependency>
 
         <!--
-            Dipendenze dichiarate esplicitamente anche se disponibili transitivamente da
-            spring-boot-autoconfigure. Una libreria non deve fare affidamento su dipendenze
-            transitive implicite: se le usa direttamente nel codice, va dichiararle.
+            Declared explicitly even though transitively available from spring-boot-autoconfigure.
+            A library must not rely on implicit transitive dependencies for types it uses directly.
         -->
 
-        <!-- @AutoConfiguration, @Bean, ApplicationContext — usati direttamente nel codice -->
+        <!-- @AutoConfiguration, @Bean, ApplicationContext — used directly in this module -->
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-context</artifactId>
         </dependency>
 
-        <!-- SLF4J — Logger/LoggerFactory usati direttamente in MuraChatAutoConfiguration -->
+        <!-- SLF4J — Logger/LoggerFactory used directly in MuraChatAutoConfiguration -->
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
         </dependency>
 
-        <!-- @Valid, @Validated — usate direttamente in ChatbotProperties -->
+        <!-- @Valid, @Validated — used directly in ChatbotProperties -->
         <dependency>
             <groupId>jakarta.validation</groupId>
             <artifactId>jakarta.validation-api</artifactId>
         </dependency>
 
-        <!-- Annotation Processor — genera metadata JSON per IDE autocomplete delle properties -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-configuration-processor</artifactId>
-            <optional>true</optional>
-        </dependency>
+        <!-- Annotation processor — must be in <annotationProcessorPaths>, not in <dependencies>.
+             Putting it on the regular compile classpath triggers Java 21's legacy annotation
+             processing mode, which breaks cross-module type resolution in reactor builds. -->
 
         <!-- Spring AI Core — ChatClient, VectorStore, Advisor API -->
         <dependency>
@@ -69,7 +66,7 @@
             <artifactId>spring-ai-autoconfigure-model-chat-client</artifactId>
         </dependency>
 
-        <!-- ===== LLM PROVIDERS — tutti optional ===== -->
+        <!-- ===== LLM PROVIDERS — all optional ===== -->
         <dependency>
             <groupId>org.springframework.ai</groupId>
             <artifactId>spring-ai-starter-model-openai</artifactId>
@@ -81,7 +78,7 @@
             <optional>true</optional>
         </dependency>
 
-        <!-- ===== VECTOR STORES ===== -->
+        <!-- ===== VECTOR STORES — all optional ===== -->
         <dependency>
             <groupId>org.springframework.ai</groupId>
             <artifactId>spring-ai-starter-vector-store-pgvector</artifactId>
@@ -110,7 +107,7 @@
             <optional>true</optional>
         </dependency>
 
-        <!-- Rate limiting — optional -->
+        <!-- Rate limiting — optional, opt-in via murachat.rate-limiting.enabled=true -->
         <dependency>
             <groupId>com.bucket4j</groupId>
             <artifactId>bucket4j-core</artifactId>
@@ -139,11 +136,38 @@
             <artifactId>postgresql</artifactId>
             <scope>test</scope>
         </dependency>
-        <!-- Driver PostgreSQL per Testcontainers -->
+        <!-- PostgreSQL driver for Testcontainers -->
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <!--
+                        spring-boot-configuration-processor must be declared here, NOT as a
+                        regular <dependency>. On the regular compile classpath, javac (Java 21)
+                        activates legacy annotation processing mode, which cannot resolve types
+                        from sibling reactor modules — causing "package does not exist" in CI.
+                        Declaring it here gives the processor its own isolated classpath and
+                        eliminates the warning entirely.
+                    -->
+                    <annotationProcessorPaths>
+                        <path>
+                            <groupId>org.springframework.boot</groupId>
+                            <artifactId>spring-boot-configuration-processor</artifactId>
+                            <version>${spring-boot.version}</version>
+                        </path>
+                    </annotationProcessorPaths>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
 </project>
