@@ -32,7 +32,7 @@ import org.springframework.context.annotation.Import;
 @EnableConfigurationProperties(ChatbotProperties.class)
 @ConditionalOnProperty(prefix = "murachat", name = "enabled", matchIfMissing = true)
 @ConditionalOnClass(ChatClient.class)
-@Import(ChatClientConfiguration.class)
+@Import({ChatClientConfiguration.class, VirtualThreadsAdvisorConfiguration.class})
 public class MuraChatAutoConfiguration {
 
     private static final Logger log = LoggerFactory.getLogger(MuraChatAutoConfiguration.class);
