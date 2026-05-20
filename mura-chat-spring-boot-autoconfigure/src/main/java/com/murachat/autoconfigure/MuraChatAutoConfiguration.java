@@ -1,5 +1,6 @@
 package com.murachat.autoconfigure;
 
+import com.murachat.autoconfigure.observability.ObservabilityConfiguration;
 import com.murachat.core.model.ClassificationResult;
 import com.murachat.core.port.out.FallbackResponseProvider;
 import com.murachat.core.port.out.QueryClassifier;
@@ -32,7 +33,7 @@ import org.springframework.context.annotation.Import;
 @EnableConfigurationProperties(ChatbotProperties.class)
 @ConditionalOnProperty(prefix = "murachat", name = "enabled", matchIfMissing = true)
 @ConditionalOnClass(ChatClient.class)
-@Import({ChatClientConfiguration.class, VirtualThreadsAdvisorConfiguration.class})
+@Import({ChatClientConfiguration.class, VirtualThreadsAdvisorConfiguration.class, ObservabilityConfiguration.class})
 public class MuraChatAutoConfiguration {
 
     private static final Logger log = LoggerFactory.getLogger(MuraChatAutoConfiguration.class);
