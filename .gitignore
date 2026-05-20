@@ -35,7 +35,6 @@ bin/
 # ===== SPRING BOOT =====
 # Generated configuration metadata (ricostruibile con mvn compile)
 **/META-INF/spring-configuration-metadata.json
-**/META-INF/additional-spring-configuration-metadata.json
 
 # ===== OS =====
 .DS_Store

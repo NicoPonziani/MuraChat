@@ -1,0 +1,133 @@
+{
+  "properties": [
+    {
+      "name": "murachat.enabled",
+      "type": "java.lang.Boolean",
+      "description": "Enable or disable the entire MuraChat auto-configuration. Default: true.",
+      "defaultValue": true
+    },
+    {
+      "name": "murachat.llm.provider",
+      "defaultValue": "openai"
+    },
+    {
+      "name": "murachat.llm.model",
+      "defaultValue": "gpt-4o"
+    },
+    {
+      "name": "murachat.vector-store.type",
+      "defaultValue": "pgvector"
+    },
+    {
+      "name": "murachat.vector-store.similarity-threshold",
+      "defaultValue": 0.75
+    },
+    {
+      "name": "murachat.vector-store.top-k",
+      "defaultValue": 5
+    },
+    {
+      "name": "murachat.rag.allow-empty-context",
+      "defaultValue": false
+    },
+    {
+      "name": "murachat.rag.system-prompt-template",
+      "defaultValue": "classpath:murachat/default-system-prompt.txt"
+    },
+    {
+      "name": "murachat.memory.enabled",
+      "defaultValue": true
+    },
+    {
+      "name": "murachat.memory.max-messages",
+      "defaultValue": 20
+    },
+    {
+      "name": "murachat.memory.max-tokens",
+      "defaultValue": 4000
+    },
+    {
+      "name": "murachat.domain-filter.enabled",
+      "defaultValue": true
+    },
+    {
+      "name": "murachat.domain-filter.mode",
+      "defaultValue": "KEYWORD"
+    },
+    {
+      "name": "murachat.ingestion.path",
+      "defaultValue": "classpath:knowledge/"
+    },
+    {
+      "name": "murachat.ingestion.chunk-size",
+      "defaultValue": 512
+    },
+    {
+      "name": "murachat.ingestion.chunk-overlap",
+      "defaultValue": 64
+    },
+    {
+      "name": "murachat.ingestion.on-startup",
+      "defaultValue": true
+    },
+    {
+      "name": "murachat.observability.log-prompts",
+      "defaultValue": false
+    },
+    {
+      "name": "murachat.observability.log-responses",
+      "defaultValue": false
+    },
+    {
+      "name": "murachat.rate-limiting.enabled",
+      "defaultValue": false
+    },
+    {
+      "name": "murachat.rate-limiting.capacity",
+      "defaultValue": 20
+    },
+    {
+      "name": "murachat.rate-limiting.refill-tokens",
+      "defaultValue": 10
+    },
+    {
+      "name": "murachat.rate-limiting.refill-period-seconds",
+      "defaultValue": 60
+    }
+  ],
+  "hints": [
+    {
+      "name": "murachat.llm.provider",
+      "values": [
+        { "value": "openai", "description": "OpenAI API (requires API key)" },
+        { "value": "ollama", "description": "Local Ollama instance (no API key required)" }
+      ]
+    },
+    {
+      "name": "murachat.llm.model",
+      "values": [
+        { "value": "gpt-4o", "description": "OpenAI GPT-4o (default)" },
+        { "value": "gpt-4o-mini", "description": "OpenAI GPT-4o Mini (faster, cheaper)" },
+        { "value": "gpt-4-turbo", "description": "OpenAI GPT-4 Turbo" },
+        { "value": "llama3", "description": "Meta Llama 3 (Ollama)" },
+        { "value": "mistral", "description": "Mistral (Ollama)" }
+      ]
+    },
+    {
+      "name": "murachat.vector-store.type",
+      "values": [
+        { "value": "pgvector", "description": "PostgreSQL pgVector extension" },
+        { "value": "redis", "description": "Redis Stack with vector search" },
+        { "value": "mongodb", "description": "MongoDB Atlas vector search" }
+      ]
+    },
+    {
+      "name": "murachat.domain-filter.mode",
+      "values": [
+        { "value": "KEYWORD", "description": "Fast keyword/regex matching (~0ms overhead)" },
+        { "value": "LLM", "description": "LLM-based classification (opt-in, ~100-200ms overhead)" }
+      ]
+    }
+  ]
+}
+

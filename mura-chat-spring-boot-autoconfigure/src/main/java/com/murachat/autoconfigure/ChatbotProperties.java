@@ -1,7 +1,6 @@
 package com.murachat.autoconfigure;
 
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.validation.annotation.Validated;
 
@@ -34,18 +33,20 @@ public record ChatbotProperties (
         @Valid MemoryProperties memory,
         @Valid DomainFilterProperties domainFilter,
         @Valid IngestionProperties ingestion,
-        @Valid ObservabilityProperties observability
+        @Valid ObservabilityProperties observability,
+        @Valid RateLimitingProperties rateLimiting
 ){
 
     public ChatbotProperties {
         if(enabled == null) enabled = true;
         if(llm == null) llm = new LlmProperties(null, null, null);
         if(vectorStore == null) vectorStore = new VectorStoreProperties(null, null, null);
-        if(rag == null) rag = new RagProperties(false, null);
+        if(rag == null) rag = new RagProperties(null, null);
         if(memory == null) memory = new MemoryProperties(null, null, null);
         if(domainFilter == null) domainFilter = new DomainFilterProperties(null, null, null);
         if(ingestion == null) ingestion = new IngestionProperties(null, null, null, null);
         if(observability == null) observability = new ObservabilityProperties(null, null);
+        if(rateLimiting == null) rateLimiting = new RateLimitingProperties(null, null, null, null);
     }
 
     // -------------------------------------------------------------------------
@@ -85,22 +86,27 @@ public record ChatbotProperties (
             Integer topK
     ) {
         public VectorStoreProperties {
-            if(type == null || type.isBlank()) type = "mongodb";
+            if(type == null || type.isBlank()) type = "pgvector";
             if(similarityThreshold == null) similarityThreshold = 0.75;
             if(topK == null) topK = 5;
         }
     }
 
     /**
-     * Properties for the RAG (Retrieval-Augmented Generation) component. Defaults to disallowing empty context and using a default system prompt template.
-     * @param allowEmptyContext When false (default), the chatbot refuses to answer if no relevant documents are found. When true, the LLM may use its general knowledge. Keep false in production to prevent hallucinations.
-     * @param systemPromptTemplate Classpath or filesystem path to the system prompt template used for RAG. Default: classpath:murachat/default-system-prompt.txt
+     * Properties for the RAG (Retrieval-Augmented Generation) component.
+     *
+     * @param allowEmptyContext When false (default), the chatbot refuses to answer if no relevant
+     *                          documents are found. When true, the LLM may use its general knowledge.
+     *                          Keep false in production to prevent hallucinations.
+     * @param systemPromptTemplate Classpath or filesystem path to the system prompt template.
+     *                             Default: classpath:murachat/default-system-prompt.txt
      */
     public record RagProperties(
-            boolean allowEmptyContext,
+            Boolean allowEmptyContext,
             String systemPromptTemplate
     ) {
         public RagProperties {
+            if(allowEmptyContext == null) allowEmptyContext = false;
             if(systemPromptTemplate == null || systemPromptTemplate.isBlank())
                 systemPromptTemplate = "classpath:murachat/default-system-prompt.txt";
         }
@@ -165,9 +171,11 @@ public record ChatbotProperties (
     }
 
     /**
-     * Properties for observability and logging. Defaults to not logging prompts or responses for security and privacy reasons.
-     * @param logPrompts When true, full prompts are logged at DEBUG level. Enable only in development — prompts may contain sensitive user data.
-     * @param logResponses When true, full LLM responses are logged at DEBUG level. Enable only in development — responses may contain sensitive user data.
+     * Properties for observability and logging. Defaults to not logging prompts or responses
+     * for security and privacy reasons.
+     *
+     * @param logPrompts When true, full prompts are logged at DEBUG level. Enable only in development.
+     * @param logResponses When true, full LLM responses are logged at DEBUG level. Enable only in development.
      */
     public record ObservabilityProperties(
             Boolean logPrompts,
@@ -176,6 +184,30 @@ public record ChatbotProperties (
         public ObservabilityProperties {
             if(logPrompts == null) logPrompts = false;
             if(logResponses == null) logResponses = false;
+        }
+    }
+
+    /**
+     * Rate limiting properties — opt-in, disabled by default.
+     * MuraChat does not impose any throttling policy automatically.
+     * The consuming app activates rate limiting with {@code murachat.rate-limiting.enabled=true}.
+     *
+     * @param enabled When true, rate limiting is active per conversation. Default: false (disabled).
+     * @param capacity Maximum number of tokens in the bucket. Default: 20.
+     * @param refillTokens Number of tokens added per refill period. Default: 10.
+     * @param refillPeriodSeconds Duration of the refill period in seconds. Default: 60.
+     */
+    public record RateLimitingProperties(
+            Boolean enabled,
+            Integer capacity,
+            Integer refillTokens,
+            Integer refillPeriodSeconds
+    ) {
+        public RateLimitingProperties {
+            if(enabled == null) enabled = false;
+            if(capacity == null) capacity = 20;
+            if(refillTokens == null) refillTokens = 10;
+            if(refillPeriodSeconds == null) refillPeriodSeconds = 60;
         }
     }
 }

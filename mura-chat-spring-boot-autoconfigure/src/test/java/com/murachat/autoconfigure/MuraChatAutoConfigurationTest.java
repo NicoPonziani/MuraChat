@@ -5,21 +5,33 @@ import com.murachat.core.model.ResponseStatus;
 import com.murachat.core.port.out.FallbackResponseProvider;
 import com.murachat.core.port.out.QueryClassifier;
 import org.junit.jupiter.api.Test;
+import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
 
 /**
- * Verifies that MuraChatAutoConfiguration registers the expected default beans
- * and respects @ConditionalOnMissingBean for overrides.
+ * Verifies that MuraChatAutoConfiguration registers the expected default beans,
+ * respects @ConditionalOnMissingBean for overrides, and properly responds to
+ * conditional properties (murachat.enabled).
  *
  * Uses ApplicationContextRunner — no Spring context started, tests are fast.
  */
 class MuraChatAutoConfigurationTest {
 
     private final ApplicationContextRunner contextRunner = new ApplicationContextRunner()
-            .withConfiguration(AutoConfigurations.of(MuraChatAutoConfiguration.class));
+            .withConfiguration(AutoConfigurations.of(MuraChatAutoConfiguration.class))
+            .withBean(ChatClient.Builder.class, () -> mock(ChatClient.Builder.class, invocation -> {
+                if (invocation.getMethod().getReturnType().isAssignableFrom(ChatClient.Builder.class)) {
+                    return invocation.getMock();
+                }
+                if (invocation.getMethod().getReturnType().isAssignableFrom(ChatClient.class)) {
+                    return mock(ChatClient.class);
+                }
+                return null;
+            }));
 
     @Test
     void defaultBeansAreRegisteredWhenNoOverridesPresent() {
@@ -55,7 +67,6 @@ class MuraChatAutoConfigurationTest {
                 .run(ctx -> {
                     assertThat(ctx).hasSingleBean(QueryClassifier.class);
                     var classifier = ctx.getBean(QueryClassifier.class);
-                    // The custom bean always returns OFF_TOPIC
                     assertThat(classifier.classify("anything"))
                             .isEqualTo(ClassificationResult.OFF_TOPIC);
                 });
@@ -75,10 +86,31 @@ class MuraChatAutoConfigurationTest {
 
     @Test
     void muraChatDisabled_noBeansRegistered() {
-        contextRunner
+        new ApplicationContextRunner()
+                .withConfiguration(AutoConfigurations.of(MuraChatAutoConfiguration.class))
                 .withPropertyValues("murachat.enabled=false")
                 .run(ctx -> {
-                    assertThat(ctx).hasSingleBean(ChatbotProperties.class);
+                    assertThat(ctx).doesNotHaveBean(QueryClassifier.class);
+                    assertThat(ctx).doesNotHaveBean(FallbackResponseProvider.class);
+                    assertThat(ctx).doesNotHaveBean(ChatClient.class);
+                });
+    }
+
+    @Test
+    void chatClientBean_isRegistered() {
+        contextRunner.run(ctx ->
+            assertThat(ctx).hasSingleBean(ChatClient.class)
+        );
+    }
+
+    @Test
+    void customChatClient_overridesDefault() {
+        var customClient = mock(ChatClient.class);
+        contextRunner
+                .withBean(ChatClient.class, () -> customClient)
+                .run(ctx -> {
+                    assertThat(ctx).hasSingleBean(ChatClient.class);
+                    assertThat(ctx.getBean(ChatClient.class)).isSameAs(customClient);
                 });
     }
 }
