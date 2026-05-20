@@ -1,52 +1,53 @@
 package com.murachat.autoconfigure;
 
-import com.murachat.core.model.ResponseStatus;
+import com.murachat.core.model.ClassificationResult;
 import com.murachat.core.port.out.FallbackResponseProvider;
 import com.murachat.core.port.out.QueryClassifier;
-import com.murachat.core.model.ClassificationResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
 
 /**
  * Main auto-configuration class for MuraChat.
  *
- * <p>Registers default bean implementations for all secondary ports.
+ * <p>Registers default bean implementations for all secondary ports and imports
+ * the {@link ChatClientConfiguration} for LLM provider switching.
  * Every bean is annotated with {@code @ConditionalOnMissingBean} — consuming apps
  * can override any component by simply registering their own {@code @Bean}.
  *
- * <p><strong>Sprint roadmap:</strong>
- * <ul>
- *   <li>Sprint 1 (current): scaffold, properties, default port implementations</li>
- *   <li>Sprint 2: ChatClient auto-configuration with provider switching</li>
- *   <li>Sprint 3: RAG pipeline (VectorStore, RetrievalAugmentationAdvisor)</li>
- *   <li>Sprint 4: DomainFilterAdvisor, ChatMemory, ChatbotServiceImpl</li>
- * </ul>
+ * <p>Provider switching works transparently: the consuming app includes
+ * the desired Spring AI provider starter on its classpath (e.g.
+ * {@code spring-ai-starter-model-openai} or {@code spring-ai-starter-model-ollama}).
+ * Spring AI auto-configures the corresponding {@code ChatModel}, and MuraChat
+ * builds its {@code ChatClient} on top of it — no code changes required.
  */
 @AutoConfiguration
 @EnableConfigurationProperties(ChatbotProperties.class)
+@ConditionalOnProperty(prefix = "murachat", name = "enabled", matchIfMissing = true)
+@ConditionalOnClass(ChatClient.class)
+@Import(ChatClientConfiguration.class)
 public class MuraChatAutoConfiguration {
 
     private static final Logger log = LoggerFactory.getLogger(MuraChatAutoConfiguration.class);
 
     /**
      * Default keyword-based query classifier.
-     *
-     * <p>Sprint 1 placeholder — returns IN_TOPIC for all queries.
+     * Passthrough placeholder — returns IN_TOPIC for all queries.
      * Will be replaced in Sprint 4 by {@code KeywordQueryClassifier}
      * with configurable keyword lists.
      */
     @Bean
     @ConditionalOnMissingBean(QueryClassifier.class)
     public QueryClassifier defaultQueryClassifier(ChatbotProperties properties) {
-        log.info("""
-                [MuraChat] Using default passthrough QueryClassifier.
-                "Override by registering a QueryClassifier @Bean in your application.
-        """);
-        // Sprint 1: passthrough — classificazione reale in Sprint 4 (DomainFilterAdvisor)
+        log.info("[MuraChat] Using default passthrough QueryClassifier. "
+                + "Override by registering a QueryClassifier @Bean in your application.");
         return query -> ClassificationResult.IN_TOPIC;
     }
 
